@@ -3,6 +3,8 @@ package com.meallens.place;
 import com.meallens.user.User;
 import com.meallens.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +42,18 @@ public class PlaceService {
         return PlaceResponse.from(savedPlace);
     }
 
-    public List<PlaceResponse> getMyPlaces(String userEmail) {
+    public List<PlaceResponse> getMyPlaces(String userEmail,MealType mealType,PlaceContext placeContext,String keyword) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        Specification<Place> spec = Specification
+                .where(PlaceSpecification.belongsToUser(user.getId()))
+                .and(PlaceSpecification.hasMealType(mealType))
+                .and(PlaceSpecification.hasContext(placeContext))
+                .and(PlaceSpecification.searchKeyword(keyword));
 
-        return placeRepository.findByUserIdOrderByVisitedOnDesc(user.getId())
-                .stream()
-                .map(PlaceResponse::from)
-                .collect(Collectors.toList());
+        Sort sort = Sort.by(Sort.Direction.DESC,"visitedOn");
+        return placeRepository.findAll(spec,sort)
+                .stream().map(PlaceResponse::from).collect(Collectors.toList());
     }
 
     @Transactional

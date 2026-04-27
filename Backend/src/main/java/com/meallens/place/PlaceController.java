@@ -8,7 +8,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.geom.QuadCurve2D;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +17,7 @@ import java.util.UUID;
 public class PlaceController {
     private final PlaceService placeService;
     private final com.meallens.share.ShareService shareService;
+    private final PhotonSearchService photonSearchService;
     @PostMapping
     public ResponseEntity<PlaceResponse> addPlace(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -37,6 +37,13 @@ public class PlaceController {
                 userDetails.getUsername(), mealType, context, search
         );
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PlaceSearchResult>> searchPlaces(
+            @RequestParam String q
+    ) {
+        return ResponseEntity.ok(photonSearchService.search(q));
     }
     @PostMapping("/share")
     public ResponseEntity<String> generateSharedLink(

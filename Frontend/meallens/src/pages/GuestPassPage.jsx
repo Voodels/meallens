@@ -5,7 +5,7 @@ const GuestPassPage = () => {
 	const { id } = useParams();
 
 	return (
-		<div className="min-h-screen bg-zinc-50 flex items-center justify-center p-6">
+		<div className="min-h-screen bg-canvas flex items-center justify-center p-6">
 			<div className="bg-white w-full max-w-lg rounded-[2rem] shadow-xl p-8 border border-zinc-100 text-center">
 				<h1 className="text-3xl font-serif font-bold text-zinc-900">Guest Pass</h1>
 				<p className="text-zinc-500 mt-3 font-medium">

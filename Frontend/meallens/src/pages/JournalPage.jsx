@@ -37,7 +37,7 @@ const JournalPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50 pb-20">
+        <div className="min-h-screen bg-canvas pb-20">
             {/* The Sticky Navigation Bar */}
             <header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-zinc-100 px-6 py-4 flex justify-between items-center">
                 <h1 className="text-2xl font-serif font-bold text-zinc-900 tracking-tight">Meal Lens</h1>
@@ -67,8 +67,10 @@ const JournalPage = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {meals.map(meal => (
-                            <MealCard key={meal.id} meal={meal} />
+                        {meals.map((meal, index) => (
+                            <div key={meal.id} className="animate-rise" style={{ animationDelay: `${index * 60}ms` }}>
+                                <MealCard meal={meal} />
+                            </div>
                         ))}
                     </div>
                 )}

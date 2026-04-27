@@ -31,10 +31,10 @@ const AuthPage = () => {
 
     return (
         // A clean, off-white background to make the white card pop
-        <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
             
             {/* The Main Hinge-style Card */}
-            <div className="bg-white w-full max-w-md rounded-[2rem] shadow-xl p-8 border border-zinc-100">
+            <div className="bg-white w-full max-w-md rounded-[2rem] shadow-xl p-8 border border-zinc-100 animate-rise">
                 
                 {/* The Brand Header */}
                 <div className="flex flex-col items-center mb-10">

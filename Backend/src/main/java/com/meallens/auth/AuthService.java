@@ -3,8 +3,10 @@ package com.meallens.auth;
 import com.meallens.user.User;
 import com.meallens.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -20,7 +22,7 @@ public class AuthService {
     public String register(RegisterRequest registerRequest) {
         // Rule 1 no duplicate Emails
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         // Rule 2 Hash Password before it ever touches the entity
@@ -42,7 +44,7 @@ public class AuthService {
                     loginRequest.getEmail());
 
             if(user.isEmpty() || !passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
-                throw new RuntimeException("Incorrect credentials");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect credentials");
             }
         //
             return jwtUtil.generateToken(user.get().getEmail());

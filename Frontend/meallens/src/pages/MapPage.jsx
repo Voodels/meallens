@@ -13,6 +13,18 @@ const customIcon = new L.DivIcon({
     iconAnchor: [8, 8]
 });
 
+const notedIcon = new L.DivIcon({
+    className: 'custom-icon noted-icon',
+    html: `
+        <div style="position: relative; width: 18px; height: 18px;">
+            <div style="background-color: #1f4d3a; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.35);"></div>
+            <span style="position: absolute; right: -4px; top: -4px; width: 10px; height: 10px; background: #c24a1d; border-radius: 50%; border: 2px solid white;"></span>
+        </div>
+    `,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+});
+
 const MapPage = () => {
     const [meals, setMeals] = useState([]);
     const navigate = useNavigate();
@@ -30,7 +42,7 @@ const MapPage = () => {
     }, []);
 
     return (
-        <div className="relative h-screen w-full bg-zinc-50">
+        <div className="relative h-screen w-full bg-canvas">
             
             {/* The Map Engine */}
             <MapContainer 
@@ -51,7 +63,7 @@ const MapPage = () => {
                         <Marker 
                             key={meal.id} 
                             position={[meal.latitude, meal.longitude]} 
-                            icon={customIcon}
+                            icon={meal.note ? notedIcon : customIcon}
                         >
                             {/* The Pop-up Card when a pin is clicked */}
                             <Popup className="rounded-2xl shadow-xl border-0">

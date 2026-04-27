@@ -7,11 +7,29 @@ const AddMealForm = ({ onClose, onSuccess }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+
+    const mealTypes = [
+        { value: 'BREAKFAST', label: 'Breakfast' },
+        { value: 'BRUNCH', label: 'Brunch' },
+        { value: 'LUNCH', label: 'Lunch' },
+        { value: 'SNACK', label: 'Snack' },
+        { value: 'DRINK', label: 'Drink' },
+        { value: 'LATE_NIGHT', label: 'Late Night' },
+        { value: 'CAFE', label: 'Cafe' },
+    ];
+
+    const placeContexts = [
+        { value: 'SOLO', label: 'Solo' },
+        { value: 'WORK', label: 'Work' },
+        { value: 'DATE', label: 'Date' },
+        { value: 'FRIENDS', label: 'Friends' },
+        { value: 'FAMILY', label: 'Family' },
+    ];
     
     const [formData, setFormData] = useState({
         name: '',
         area: '',
-        mealType: 'RESTAURANT',
+        mealType: 'CAFE',
         context: 'FRIENDS',
         visitedOn: new Date().toISOString().split('T')[0],
         note: '',
@@ -36,9 +54,10 @@ const AddMealForm = ({ onClose, onSuccess }) => {
     const performSearch = async () => {
         setIsSearching(true);
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&addressdetails=1&limit=5`);
-            const data = await res.json();
-            setSearchResults(data);
+            const response = await api.get('/places/search', {
+                params: { q: searchQuery }
+            });
+            setSearchResults(response.data);
         } catch (err) {
             console.error("Location search failed", err);
         } finally {
@@ -47,18 +66,17 @@ const AddMealForm = ({ onClose, onSuccess }) => {
     };
 
     const handleSelectLocation = (result) => {
-        const address = result.address;
-        // Nominatim gives very specific data; we try to find the best 'Neighborhood' name
-        const neighborhood = address.suburb || address.neighbourhood || address.city_district || address.city || "Unknown Area";
+        const address = result.address || "";
+        const primaryArea = address.split(',')[0] || "Unknown Area";
         
         setFormData({
             ...formData,
-            name: result.display_name.split(',')[0], // Take just the place name
-            area: neighborhood,
-            latitude: parseFloat(result.lat),
-            longitude: parseFloat(result.lon)
+            name: result.name,
+            area: primaryArea.trim(),
+            latitude: result.latitude,
+            longitude: result.longitude
         });
-        setSearchQuery(result.display_name);
+        setSearchQuery(result.name);
         setSearchResults([]);
     };
 
@@ -79,7 +97,7 @@ const AddMealForm = ({ onClose, onSuccess }) => {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-            <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative border border-zinc-100">
+            <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative border border-zinc-100 animate-rise">
                 <button onClick={onClose} className="absolute top-8 right-8 p-2 bg-zinc-100 rounded-full text-zinc-500 hover:text-black transition-colors">
                     <X size={20} />
                 </button>
@@ -107,15 +125,15 @@ const AddMealForm = ({ onClose, onSuccess }) => {
                             <div className="absolute z-10 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden">
                                 {searchResults.map((result) => (
                                     <button
-                                        key={result.place_id}
+                                        key={`${result.name}-${result.latitude}-${result.longitude}`}
                                         type="button"
                                         onClick={() => handleSelectLocation(result)}
                                         className="w-full text-left p-4 hover:bg-zinc-50 flex items-start gap-3 border-b border-zinc-50 last:border-0"
                                     >
                                         <MapPin className="text-zinc-400 shrink-0 mt-1" size={18} />
                                         <div>
-                                            <p className="font-bold text-zinc-900 leading-tight">{result.display_name.split(',')[0]}</p>
-                                            <p className="text-xs text-zinc-400 mt-1 line-clamp-1">{result.display_name}</p>
+                                            <p className="font-bold text-zinc-900 leading-tight">{result.name}</p>
+                                            <p className="text-xs text-zinc-400 mt-1 line-clamp-1">{result.address}</p>
                                         </div>
                                     </button>
                                 ))}
@@ -148,14 +166,26 @@ const AddMealForm = ({ onClose, onSuccess }) => {
                     {/* Vibe and Context */}
                     <div className="space-y-3">
                         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                            {['CAFE', 'RESTAURANT', 'BAR', 'STREET_FOOD'].map(type => (
+                            {mealTypes.map((type) => (
                                 <button
-                                    key={type}
+                                    key={type.value}
                                     type="button"
-                                    onClick={() => setFormData({...formData, mealType: type})}
-                                    className={`px-4 py-2 rounded-full text-xs font-black tracking-widest border-2 transition-all ${formData.mealType === type ? 'bg-black border-black text-white' : 'bg-white border-zinc-100 text-zinc-400'}`}
+                                    onClick={() => setFormData({...formData, mealType: type.value})}
+                                    className={`px-4 py-2 rounded-full text-xs font-black tracking-widest border-2 transition-all ${formData.mealType === type.value ? 'bg-black border-black text-white' : 'bg-white border-zinc-100 text-zinc-400'}`}
                                 >
-                                    {type}
+                                    {type.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                            {placeContexts.map((context) => (
+                                <button
+                                    key={context.value}
+                                    type="button"
+                                    onClick={() => setFormData({...formData, context: context.value})}
+                                    className={`px-4 py-2 rounded-full text-xs font-black tracking-widest border-2 transition-all ${formData.context === context.value ? 'bg-black border-black text-white' : 'bg-white border-zinc-100 text-zinc-400'}`}
+                                >
+                                    {context.label}
                                 </button>
                             ))}
                         </div>

@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.geom.QuadCurve2D;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor // gives ->
 public class PlaceController {
     private final PlaceService placeService;
+    private final com.meallens.share.ShareService shareService;
     @PostMapping
     public ResponseEntity<PlaceResponse> addPlace(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -26,11 +28,30 @@ public class PlaceController {
     }
     @GetMapping
     public ResponseEntity<List<PlaceResponse>> getMyPlaces(
-            @AuthenticationPrincipal UserDetails userDetails
-    ){
-        List<PlaceResponse> res = placeService.getMyPlaces(userDetails.getUsername());
-        return ResponseEntity.ok(res);
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) MealType mealType,
+            @RequestParam(required = false) PlaceContext context,
+            @RequestParam(required = false) String search
+    ) {
+        List<PlaceResponse> responses = placeService.getMyPlaces(
+                userDetails.getUsername(), mealType, context, search
+        );
+        return ResponseEntity.ok(responses);
     }
+    @PostMapping("/share")
+    public ResponseEntity<String> generateSharedLink(
+                                                      @AuthenticationPrincipal UserDetails userDetails,
+                                                      @RequestParam(required = false) MealType mealType,
+                                                      @RequestParam(required = false) PlaceContext context,
+                                                      @RequestParam(required = false) String search
+    ){
+        String shareId = shareService.createShareLink(
+                userDetails.getUsername(),mealType,context,search
+        );
+
+        return ResponseEntity.ok(shareId);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<PlaceResponse> deletePlace(
             @AuthenticationPrincipal UserDetails userDetails,

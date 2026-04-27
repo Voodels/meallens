@@ -12,16 +12,12 @@ public class PlaceSpecification {
     }
     // the Meal Type Block
     public static Specification<Place> hasMealType(MealType mealType){
-        return (root, query, criteriaBuilder) -> {
-            return mealType==null ? null : criteriaBuilder.equal(root.get("mealType"), mealType);
-        };
+        return (root, query, criteriaBuilder) -> mealType==null ? null : criteriaBuilder.equal(root.get("mealType"), mealType);
     }
 
     // Cntext Block
     public static Specification<Place> hasContext(PlaceContext context){
-        return (root,query,criteriaBuilder)->{
-            return context==null?null:criteriaBuilder.equal(root.get("context"),context);
-        };
+        return (root,query,criteriaBuilder)-> context==null?null:criteriaBuilder.equal(root.get("context"),context);
     }
     // Global Text Search Block
     public static Specification<Place> searchKeyword(String keyword){

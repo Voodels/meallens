@@ -31,9 +31,11 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // VIP lane: no token needed for login/register
-                        .anyRequest().authenticated()                // Front door: Bouncer checks everyone else
-                )
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/error").permitAll() // <-- UNLOCK THE ERROR PAGE
+                .anyRequest().authenticated()
+        )
                 // 1. The Goldfish Rule
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 2. The Verification Desk
